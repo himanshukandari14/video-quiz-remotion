@@ -150,6 +150,9 @@ export const VideoContent: React.FC = () => {
         height,
         position: "relative",
         overflow: "hidden",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
       }}
       className="bg-gradient-to-b from-blue-900 to-black"
     >
@@ -157,8 +160,8 @@ export const VideoContent: React.FC = () => {
         <Img
           src={backgroundUrl}
           style={{
-            width: "512",
-            height: "910px",
+            width: "100%",
+            height: "100%",
             objectFit: "cover",
             position: "absolute",
             top: 0,
@@ -168,59 +171,64 @@ export const VideoContent: React.FC = () => {
         />
       )}
 
-      <div className="absolute z-10 flex flex-col items-center justify-center">
-        <div className="w-full mx-auto px-4 text-center">
-          <h1 className="text-white text-4xl font-bold mb-12">
-            Country Scramble Quiz
-          </h1>
+      <div className="absolute z-10 w-1/3 p-8 space-y-6">
+        <h1 className="text-white text-4xl font-semibold mb-8">
+          Country Scramble Quiz
+        </h1>
 
-          {currentCaption && (
-            <div className="w-full mb-8">
-              <div className="inline-block text-white text-2xl text-center bg-black bg-opacity-50 p-4 rounded-lg">
-                {currentCaption.text}
-              </div>
+        {currentCaption && (
+          <div className="w-full mb-8">
+            <div className="inline-block text-white text-xl text-center bg-black bg-opacity-70 p-4 rounded-xl">
+              {currentCaption.text}
             </div>
+          </div>
+        )}
+
+        <div className="space-y-6">
+          {!showAnswer ? (
+            <h2 className="text-white text-5xl font-bold text-center">
+              {countries[currentCountryIndex].scrambled}
+            </h2>
+          ) : (
+            <h3 className="text-green-400 text-4xl font-bold text-center">
+              Answer: {countries[currentCountryIndex].original}
+            </h3>
           )}
 
-          <div className="space-y-8">
-            {!showAnswer ? (
-              <h2 className="text-white text-5xl font-bold">
-                {countries[currentCountryIndex].scrambled}
-              </h2>
-            ) : (
-              <h3 className="text-green-400 text-4xl font-bold">
-                Answer: {countries[currentCountryIndex].original}
-              </h3>
-            )}
-
-            {!showAnswer ? (
-              <h3 className="text-white text-2xl">Revealing in {timer}...</h3>
-            ) : (
-              <h3 className="text-green-400 text-4xl font-bold">
-                Answer: {countries[currentCountryIndex].original}
-              </h3>
-            )}
-          </div>
-
-          {error && (
-            <div className="mt-8 text-red-500 bg-black bg-opacity-50 p-2 rounded inline-block">
-              {error}
-            </div>
+          {!showAnswer ? (
+            <h3 className="text-white text-2xl text-center">
+              Revealing in {timer}...
+            </h3>
+          ) : (
+            <h3 className="text-green-400 text-4xl font-bold text-center">
+              Answer: {countries[currentCountryIndex].original}
+            </h3>
           )}
-
-          <div className="absolute bottom-8 w-full text-center text-white text-xl">
-            {currentCountryIndex + 1} / 10
-          </div>
-
-          <div className="mt-8 text-white text-xl">
-            <h3 className="font-bold">Answered Countries:</h3>
-            <ul>
-              {answeredCountries.map((country, index) => (
-                <li key={index}>{country.original}</li>
-              ))}
-            </ul>
-          </div>
         </div>
+      </div>
+
+      <div
+        className="absolute left-8 top-8 text-white text-lg font-medium space-y-4"
+        style={{ maxHeight: "90%", overflowY: "auto" }}
+      >
+        <h3 className="font-semibold text-xl mb-4">Answered Countries:</h3>
+        <ul>
+          {answeredCountries.map((country, index) => (
+            <li key={index} className="mb-2">{`${index + 1}. ${
+              country.original
+            }`}</li>
+          ))}
+        </ul>
+      </div>
+
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="text-white text-xl">{error}</div>
+        </div>
+      )}
+
+      <div className="absolute bottom-8 w-full text-center text-white text-lg">
+        {currentCountryIndex + 1} / 10
       </div>
 
       {voiceoverUrl && !error && <Audio src={voiceoverUrl} startFrom={0} />}
