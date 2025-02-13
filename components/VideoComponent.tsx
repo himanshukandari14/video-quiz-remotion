@@ -21,6 +21,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
   countries,
 }) => {
   const { width, height } = useVideoConfig();
+  const [scrambled, setScrambled] = useState("");
   const [voiceoverUrl, setVoiceoverUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,10 +79,15 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
   // Handle quiz logic
   useEffect(() => {
     if (introPhase || currentCountryIndex < 0) return; // Skip if still in intro phase
-
+    let scrambled = "";
     const handleQuestion = async () => {
-      const scrambled = countries[currentCountryIndex];
-      const questionText = `Can you name this scrambled country? Your word is ${scrambled}`;
+      const country = countries[currentCountryIndex];
+      const shuffled = country
+        .split('')
+        .sort(() => 0.5 - Math.random())
+        .join('');
+      setScrambled(shuffled);
+      const questionText = `Can you name this scrambled country? Your word is ${shuffled}`;
       await generateVoiceover(questionText);
 
       // Start countdown
@@ -177,7 +183,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
               {!showAnswer ? (
                 <>
                   <h2 className="text-[14px] font-bold text-center">
-                    {countries[currentCountryIndex]}
+                    {scrambled}
                   </h2>
                   <h3 className="text-[14px] text-center">
                     Revealing in {timer}...
