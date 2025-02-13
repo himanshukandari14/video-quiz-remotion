@@ -1,4 +1,5 @@
-import { Composition } from "remotion"
+import { Composition } from "remotion";
+import { VideoComponent } from "@/components/VideoComponent";
 
 const CountryScramble = () => {
   return (
@@ -9,8 +10,8 @@ const CountryScramble = () => {
       fps={30}
       width={1080}
       height={1920}
-    ></Composition>
+    />
   );
-}
+};
 
-export default CountryScramble
+export default CountryScramble;

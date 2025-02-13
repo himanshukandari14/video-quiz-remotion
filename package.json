@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@remotion/player": "^4.0.261",
     "@shadcn/ui": "^0.0.4",
     "axios": "^1.7.9",
     "next": "15.1.7",
