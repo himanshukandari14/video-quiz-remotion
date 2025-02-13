@@ -172,7 +172,7 @@ export const VideoContent: React.FC = () => {
         />
       )}
 
-     <div className="absolute top-0 left-[10px] z-10 p-8 w-[400px] flex flex-col justify-center items-center">
+     <div className="absolute top-0 left-[10px] z-10 w-[400px] flex flex-col justify-center items-center">
   <h1 className="text-white text-2xl font-semibold text-center mb-2">
     Country Scramble Quiz
   </h1>
