@@ -14,7 +14,7 @@ export default function Home() {
           Country Scramble Game
         </h1>
 
-        <div className="aspect-[9/16] w-full max-w-lg mx-auto bg-black rounded-lg overflow-hidden shadow-xl">
+        <div className="aspect-[9/16] h-[600px] w-[400px] mx-auto bg-black rounded-lg overflow-hidden shadow-xl">
           <Player
             component={VideoContent} // Corrected: Using VideoContent
             durationInFrames={300}
