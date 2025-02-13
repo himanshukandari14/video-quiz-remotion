@@ -1,70 +1,67 @@
-"use client";
+'use client'
 import { useState } from "react";
 import { Player } from "@remotion/player";
-
 import { RemotionRoot } from "../components/RemotionRoot";
 import QuizCustomizer from "@/components/QuizCustomizer";
 import QuizRenderer from "@/components/VideoComponent";
 
 export default function Home() {
-  const [quizConfig, setQuizConfig] = useState<{
-    quizTitle: string;
-    voiceover: string;
-    background: string | null;
-    themeColor: string;
-    font: string;
-    countries: string[];
-  } | null>(null);
+  const [quizConfig, setQuizConfig] = useState(null);
 
-  const handleQuizGenerated = (config: {
-    quizTitle: string;
-    voiceover: string;
-    background: string | null;
-    themeColor: string;
-    font: string;
-    countries: string[];
-  }) => {
-    setQuizConfig(config); // Set the quiz configuration
+  const handleQuizGenerated = (config) => {
+    setQuizConfig(config);
   };
 
   return (
-    <main className="min-h-screen p-8 bg-gray-900">
-      <RemotionRoot /> {/* Register the composition globally */}
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-8 text-center">
-          Country Scramble Game
-        </h1>
+    <main className="min-h-screen p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <RemotionRoot />
 
-        {/* Render the QuizCustomizer */}
-        <QuizCustomizer onQuizGenerated={handleQuizGenerated} />
+      {/* Glassmorphic container */}
+      <div className="relative max-w-6xl mx-auto p-8 rounded-2xl overflow-hidden">
+        {/* Blurred background elements */}
+        <div className="absolute top-0 left-1/4 w-48 h-48 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
+        <div className="absolute top-0 right-1/4 w-48 h-48 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
+        <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-green-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
 
-        {/* Conditionally render the Player when quizConfig is available */}
-        {quizConfig && (
-          <div className="aspect-[9/16] h-[600px] w-[400px] mx-auto bg-black rounded-lg overflow-hidden shadow-xl mt-8">
-            <Player
-              component={QuizRenderer}
-              inputProps={quizConfig} // Pass quiz configuration as inputProps
-              durationInFrames={300}
-              compositionWidth={1080}
-              compositionHeight={1920}
-              fps={30}
-              controls
-              autoPlay
-              loop
-            />
+        {/* Content */}
+        <div className="relative">
+          {/* Title with enhanced glassmorphic effect */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-300 via-green-400 to-emerald-500 drop-shadow-lg">
+              Country Scramble Game
+            </h1>
+            <div className="h-1 w-48 mx-auto mt-4 bg-gradient-to-r from-green-300 via-green-400 to-emerald-500 rounded-full" />
           </div>
-        )}
 
-        <div className="mt-8 text-center">
-          <p className="text-gray-300 mb-4">
-            Try to guess the scrambled country names before the timer runs out!
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
-          >
-            Play Again
-          </button>
+          {/* Quiz Customizer wrapped in glassmorphic card */}
+          <div className="backdrop-blur-lg bg-white/10 rounded-xl p-6 shadow-xl border border-white/20">
+            <QuizCustomizer onQuizGenerated={handleQuizGenerated} />
+          </div>
+
+          {/* Player container with enhanced styling */}
+          {quizConfig && (
+            <div className="mt-12 flex justify-center">
+              <div className="relative aspect-[9/16] h-[600px] w-[400px]">
+                {/* Glow effect behind player */}
+                <div className="absolute inset-0 bg-green-500 opacity-20 blur-xl -z-10" />
+
+                {/* Glassmorphic player container */}
+                <div className="relative h-full backdrop-blur-lg bg-white/10 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+                  <Player
+                    component={QuizRenderer}
+                    inputProps={quizConfig}
+                    durationInFrames={300}
+                    compositionWidth={1080}
+                    compositionHeight={1920}
+                    fps={30}
+                    controls
+                    autoPlay
+                    loop
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>
