@@ -7,6 +7,7 @@ import { fetchVoiceover } from "../utils/fetchVoiceover";
 import Image from "next/image";
 import image from "../app/assets/download (2).jpg";
 import countriesData from "../data/countries.json";
+import { generateBackgroundImage } from "@/utils/generateBackground";
 
 const shuffleString = (str: string) => {
   return str
@@ -91,8 +92,15 @@ export const VideoContent: React.FC = () => {
 
   return (
     <div style={{ width, height, position: "relative" }}>
-      <Img src={staticFile("/background.jpg")} style={{ width, height }} />
-      <Image src={image} height={100} width={100} alt="image" />
+      {backgroundUrl ? (
+        <Img
+          src={backgroundUrl}
+          style={{ width, height, objectFit: "cover" }}
+        />
+      ) : (
+        // Fallback/loading state
+        <div className="w-full h-full bg-gradient-to-b from-blue-900 to-black" />
+      )}
 
       <h1 className="absolute top-10 left-1/2 transform -translate-x-1/2 text-white text-3xl font-bold">
         Country Scramble Quiz
