@@ -1,4 +1,3 @@
-// components/VideoComponent.tsx
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
@@ -7,7 +6,6 @@ import { fetchVoiceover } from "../utils/fetchVoiceover";
 import countriesData from "../data/countries.json";
 import { generateBackgroundImage } from "@/utils/generateBackground";
 
-// Types
 interface Caption {
   text: string;
   startTime: number;
@@ -26,7 +24,6 @@ interface VideoContent {
   voiceoverText: string;
 }
 
-// Utility functions
 const shuffleString = (str: string): string => {
   return str
     .split("")
@@ -36,17 +33,13 @@ const shuffleString = (str: string): string => {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Initialize countries data
 const countries: Country[] = countriesData.countryList.map((name) => ({
   original: name,
   scrambled: shuffleString(name),
 }));
 
 export const VideoContent: React.FC = () => {
-  // Video configuration
   const { width, height } = useVideoConfig();
-
-  // State management
   const [voiceoverUrl, setVoiceoverUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +51,6 @@ export const VideoContent: React.FC = () => {
   const [videoContent, setVideoContent] = useState<VideoContent | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Generate voiceover text
   const generateVoiceover = useCallback(async () => {
     if (!currentCountry) return;
 
@@ -76,7 +68,6 @@ export const VideoContent: React.FC = () => {
     }
   }, [currentCountry]);
 
-  // Initialize video content and background
   useEffect(() => {
     const initializeVideo = async () => {
       try {
@@ -97,7 +88,6 @@ export const VideoContent: React.FC = () => {
     initializeVideo();
   }, []);
 
-  // Handle caption timing
   useEffect(() => {
     if (!videoContent?.captions) return;
 
@@ -117,12 +107,10 @@ export const VideoContent: React.FC = () => {
     return () => clearInterval(captionTimer);
   }, [timer, videoContent]);
 
-  // Generate voiceover when country changes
   useEffect(() => {
     generateVoiceover();
   }, [generateVoiceover]);
 
-  // Timer effect
   useEffect(() => {
     const interval = setInterval(() => {
       setTimer((prev) => {
@@ -138,7 +126,6 @@ export const VideoContent: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle country transition
   const moveToNextCountry = useCallback(() => {
     if (currentIndex < countries.length - 1) {
       setCurrentIndex((prev) => prev + 1);
@@ -167,13 +154,12 @@ export const VideoContent: React.FC = () => {
       }}
       className="bg-gradient-to-b from-blue-900 to-black"
     >
-      {/* Background */}
       {backgroundUrl && (
         <Img
           src={backgroundUrl}
           style={{
-            width,
-            height,
+            width:"512",
+            height:"910px",
             objectFit: "cover",
             position: "absolute",
             top: 0,
@@ -183,54 +169,51 @@ export const VideoContent: React.FC = () => {
         />
       )}
 
-      {/* Content Overlay */}
-      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center">
-        {/* Title */}
-        <h1 className="absolute top-10 left-1/2 transform -translate-x-1/2 text-white text-3xl font-bold">
-          Country Scramble Quiz
-        </h1>
+      <div className="absolute  z-10 flex flex-col items-center justify-center bg-red">
+        <div className="w-full  mx-auto px-4 text-center">
+          <h1 className="text-white text-4xl font-bold mb-12">
+            Country Scramble Quiz
+          </h1>
 
-        {/* Caption */}
-        {currentCaption && (
-          <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 text-white text-2xl text-center bg-black bg-opacity-50 p-4 rounded-lg">
-            {currentCaption.text}
+          {currentCaption && (
+            <div className="w-full mb-8">
+              <div className="inline-block text-white text-2xl text-center bg-black bg-opacity-50 p-4 rounded-lg">
+                {currentCaption.text}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-8">
+            <h2 className="text-white text-5xl font-bold">
+              {currentCountry.scrambled}
+            </h2>
+
+            {!showAnswer ? (
+              <h3 className="text-white text-2xl">Revealing in {timer}...</h3>
+            ) : (
+              <h3 className="text-green-400 text-4xl font-bold">
+                Answer: {currentCountry.original}
+              </h3>
+            )}
           </div>
-        )}
 
-        {/* Scrambled Country */}
-        <h2 className="text-white text-4xl font-bold mb-8">
-          {currentCountry.scrambled}
-        </h2>
+          {error && (
+            <div className="mt-8 text-red-500 bg-black bg-opacity-50 p-2 rounded inline-block">
+              {error}
+            </div>
+          )}
 
-        {/* Timer or Answer */}
-        {!showAnswer ? (
-          <h3 className="text-white text-xl">Revealing in {timer}...</h3>
-        ) : (
-          <h3 className="text-green-400 text-3xl font-bold">
-            Answer: {currentCountry.original}
-          </h3>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 text-red-500 bg-black bg-opacity-50 p-2 rounded">
-            {error}
+          <div className="absolute bottom-8 w-full text-center text-white text-xl">
+            {currentIndex + 1} / {countries.length}
           </div>
-        )}
-
-        {/* Progress Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white">
-          {currentIndex + 1} / {countries.length}
         </div>
       </div>
 
-      {/* Audio */}
       {voiceoverUrl && !error && <Audio src={voiceoverUrl} startFrom={0} />}
 
-      {/* Loading Indicator */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="text-white">Loading...</div>
+          <div className="text-white text-xl">Loading...</div>
         </div>
       )}
     </div>
