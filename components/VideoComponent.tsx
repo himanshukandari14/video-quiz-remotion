@@ -171,14 +171,14 @@ export const VideoContent: React.FC = () => {
         />
       )}
 
-      <div className="absolute z-10 w-1/3 p-8 space-y-6">
-        <h1 className="text-white text-4xl font-semibold mb-8">
+      <div className="absolute top-0 z-10  p-8 space-y-6">
+        <h1 className="text-white text-2xl font-semibold mb-8">
           Country Scramble Quiz
         </h1>
 
         {currentCaption && (
-          <div className="w-full mb-8">
-            <div className="inline-block text-white text-xl text-center bg-black bg-opacity-70 p-4 rounded-xl">
+          <div className="w-[400px] mb-8">
+            <div className="inline-block text-red-200 text-xl text-center p-4 rounded-xl">
               {currentCaption.text}
             </div>
           </div>
@@ -186,11 +186,11 @@ export const VideoContent: React.FC = () => {
 
         <div className="space-y-6">
           {!showAnswer ? (
-            <h2 className="text-white text-5xl font-bold text-center">
+            <h2 className="text-white text-2xl font-bold text-center">
               {countries[currentCountryIndex].scrambled}
             </h2>
           ) : (
-            <h3 className="text-green-400 text-4xl font-bold text-center">
+            <h3 className="text-green-400 text-2xl font-bold text-center">
               Answer: {countries[currentCountryIndex].original}
             </h3>
           )}
