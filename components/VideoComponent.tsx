@@ -160,8 +160,8 @@ export const VideoContent: React.FC = () => {
         <Img
           src={backgroundUrl}
           style={{
-            width: "100%",
-            height: "100%",
+            width: "40%",
+            height: "35%",
             objectFit: "cover",
             position: "absolute",
             top: 0,
