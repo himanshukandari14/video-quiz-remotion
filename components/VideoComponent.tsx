@@ -31,8 +31,6 @@ const shuffleString = (str: string): string => {
     .join("");
 };
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const countries: Country[] = countriesData.countryList.map((name) => ({
   original: name,
   scrambled: shuffleString(name),
@@ -43,30 +41,30 @@ export const VideoContent: React.FC = () => {
   const [voiceoverUrl, setVoiceoverUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [timer, setTimer] = useState(3);
+  const [currentCountryIndex, setCurrentCountryIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [currentCountry, setCurrentCountry] = useState<Country>(countries[0]);
-  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+  const [timer, setTimer] = useState(3);
   const [currentCaption, setCurrentCaption] = useState<Caption | null>(null);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
   const [videoContent, setVideoContent] = useState<VideoContent | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answeredCountries, setAnsweredCountries] = useState<Country[]>([]);
 
   const generateVoiceover = useCallback(async () => {
-    if (!currentCountry) return;
-
-    setIsLoading(true);
-    setError(null);
-    try {
-      const voiceoverText = `Can you name this scrambled country? Your word is ${currentCountry.scrambled}`;
-      const url = await fetchVoiceover(voiceoverText);
-      setVoiceoverUrl(url);
-    } catch (err) {
-      console.error("Failed to generate voiceover:", err);
-      setError("Failed to generate audio");
-    } finally {
-      setIsLoading(false);
+    if (currentCountryIndex < countries.length) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const voiceoverText = `Can you name this scrambled country? Your word is ${countries[currentCountryIndex].scrambled}`;
+        const url = await fetchVoiceover(voiceoverText);
+        setVoiceoverUrl(url);
+      } catch (err) {
+        console.error("Failed to generate voiceover:", err);
+        setError("Failed to generate audio");
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [currentCountry]);
+  }, [currentCountryIndex]);
 
   useEffect(() => {
     const initializeVideo = async () => {
@@ -124,25 +122,26 @@ export const VideoContent: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [currentCountryIndex]);
 
   const moveToNextCountry = useCallback(() => {
-    if (currentIndex < countries.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      setCurrentCountry(countries[currentIndex + 1]);
-      setTimer(3);
+    if (currentCountryIndex < countries.length - 1) {
+      setCurrentCountryIndex((prev) => prev + 1);
       setShowAnswer(false);
+      setTimer(3);
     }
-  }, [currentIndex]);
+  }, [currentCountryIndex]);
 
   useEffect(() => {
     if (showAnswer) {
+      setAnsweredCountries((prev) => [...prev, countries[currentCountryIndex]]);
+
       const timeout = setTimeout(() => {
         moveToNextCountry();
       }, 2000);
       return () => clearTimeout(timeout);
     }
-  }, [showAnswer, moveToNextCountry]);
+  }, [showAnswer, moveToNextCountry, currentCountryIndex]);
 
   return (
     <div
@@ -158,8 +157,8 @@ export const VideoContent: React.FC = () => {
         <Img
           src={backgroundUrl}
           style={{
-            width:"512",
-            height:"910px",
+            width: "512",
+            height: "910px",
             objectFit: "cover",
             position: "absolute",
             top: 0,
@@ -169,8 +168,8 @@ export const VideoContent: React.FC = () => {
         />
       )}
 
-      <div className="absolute  z-10 flex flex-col items-center justify-center bg-red">
-        <div className="w-full  mx-auto px-4 text-center">
+      <div className="absolute z-10 flex flex-col items-center justify-center">
+        <div className="w-full mx-auto px-4 text-center">
           <h1 className="text-white text-4xl font-bold mb-12">
             Country Scramble Quiz
           </h1>
@@ -184,15 +183,21 @@ export const VideoContent: React.FC = () => {
           )}
 
           <div className="space-y-8">
-            <h2 className="text-white text-5xl font-bold">
-              {currentCountry.scrambled}
-            </h2>
+            {!showAnswer ? (
+              <h2 className="text-white text-5xl font-bold">
+                {countries[currentCountryIndex].scrambled}
+              </h2>
+            ) : (
+              <h3 className="text-green-400 text-4xl font-bold">
+                Answer: {countries[currentCountryIndex].original}
+              </h3>
+            )}
 
             {!showAnswer ? (
               <h3 className="text-white text-2xl">Revealing in {timer}...</h3>
             ) : (
               <h3 className="text-green-400 text-4xl font-bold">
-                Answer: {currentCountry.original}
+                Answer: {countries[currentCountryIndex].original}
               </h3>
             )}
           </div>
@@ -204,7 +209,16 @@ export const VideoContent: React.FC = () => {
           )}
 
           <div className="absolute bottom-8 w-full text-center text-white text-xl">
-            {currentIndex + 1} / {countries.length}
+            {currentCountryIndex + 1} / 10
+          </div>
+
+          <div className="mt-8 text-white text-xl">
+            <h3 className="font-bold">Answered Countries:</h3>
+            <ul>
+              {answeredCountries.map((country, index) => (
+                <li key={index}>{country.original}</li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
