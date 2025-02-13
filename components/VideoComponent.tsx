@@ -7,7 +7,6 @@ import { generateBackgroundImage } from "@/utils/generateBackground";
 
 interface QuizRendererProps {
   quizTitle: string;
-  voiceover: string;
   background: string | null;
   themeColor: string;
   font: string;
@@ -16,7 +15,6 @@ interface QuizRendererProps {
 
 export const QuizRenderer: React.FC<QuizRendererProps> = ({
   quizTitle,
-  voiceover,
   background,
   themeColor,
   font,
@@ -39,7 +37,9 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     setError(null);
     try {
       const url = await fetchVoiceover(text);
-      setVoiceoverUrl(url);
+      if (typeof url === 'string') {
+        setVoiceoverUrl(url);
+      }
     } catch (err) {
       console.error("Failed to generate voiceover:", err);
       setError("Failed to generate audio");
@@ -90,6 +90,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           if (prev === 1) {
             clearInterval(interval);
             setShowAnswer(true);
+            console.log("Timer reached 0, showAnswer set to true");
             return 0;
           }
           return prev - 1;
@@ -117,6 +118,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
 
       return () => clearTimeout(timeout);
     }
+    console.log("showAnswer:", showAnswer, "currentCountryIndex:", currentCountryIndex, "countries.length:", countries.length);
   }, [showAnswer, currentCountryIndex, countries]);
 
   return (
@@ -157,7 +159,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
             Welcome to {quizTitle}!
             <br />
             <span className="text-3xl mt-4 block">
-              Can you guess the 10 scrambled countries? Let's go!
+              Can you guess the 10 scrambled countries? Let&apos;s go!
             </span>
           </h1>
         </div>

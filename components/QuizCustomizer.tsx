@@ -30,15 +30,6 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
   const [background, setBackground] = useState<string | null>(null);
   const [themeColor, setThemeColor] = useState("#ffffff");
   const [font, setFont] = useState("Arial");
-  const [countries, setCountries] = useState<string[]>([]);
- const fetchRandomCountries = () => {
-   // Use the imported country list and shuffle it
-   const shuffled = countriesData.countryList
-     .sort(() => 0.5 - Math.random())
-     .slice(0, 10); // Get the first 10 countries after shuffling
-   setCountries(shuffled);
-   console.log(shuffled,"shuff")
- };
 
   const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -50,31 +41,20 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
     }
   };
 
-  // const handleGenerateQuiz = () => {
-  //   fetchRandomCountries();
-  //   onQuizGenerated({
-  //     quizTitle,
-  //     voiceover,
-  //     background,
-  //     themeColor,
-  //     font,
-  //     countries,
-  //   });
-  // };
-const handleGenerateQuiz = () => {
-  fetchRandomCountries();
-  // Wait for countries to be fetched and then call onQuizGenerated
-  setTimeout(() => {
+  const handleGenerateQuiz = () => {
+    const shuffledCountries = countriesData.countryList
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 10);
+    console.log("shuffledCountries before onQuizGenerated:", shuffledCountries);
     onQuizGenerated({
       quizTitle,
       voiceover,
       background,
       themeColor,
       font,
-      countries,
+      countries: shuffledCountries,
     });
-  }, 1000); // Adjust the delay if necessary based on fetch time
-};
+  };
 
   return (
     <div className="p-6 flex flex-col gap-6">

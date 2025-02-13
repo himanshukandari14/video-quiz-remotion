@@ -24,14 +24,8 @@ export default function Home() {
         <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-green-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
 
         {/* Content */}
-        <div className="relative">
-          {/* Title with enhanced glassmorphic effect */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-300 via-green-400 to-emerald-500 drop-shadow-lg">
-              Country Scramble Game
-            </h1>
-            <div className="h-1 w-48 mx-auto mt-4 bg-gradient-to-r from-green-300 via-green-400 to-emerald-500 rounded-full" />
-          </div>
+        <div className="relative w-full flex justify-center align-center">
+        
 
           {/* Quiz Customizer wrapped in glassmorphic card */}
           <div className="backdrop-blur-lg bg-white/10 rounded-xl p-6 shadow-xl border border-white/20">
