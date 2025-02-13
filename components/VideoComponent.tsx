@@ -362,7 +362,7 @@ export const VideoContent: React.FC = () => {
           src={backgroundUrl}
           style={{
             width: "100%",
-            height: "100%",
+            height: "33%",
             objectFit: "cover",
             position: "absolute",
             top: 0,
