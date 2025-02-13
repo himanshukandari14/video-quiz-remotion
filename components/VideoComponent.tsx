@@ -151,8 +151,9 @@ export const VideoContent: React.FC = () => {
         position: "relative",
         overflow: "hidden",
         display: "flex",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
+        flexDirection: "column",
       }}
       className="bg-gradient-to-b from-blue-900 to-black"
     >
@@ -160,8 +161,8 @@ export const VideoContent: React.FC = () => {
         <Img
           src={backgroundUrl}
           style={{
-            width: "40%",
-            height: "35%",
+            width: "100%",
+            height: "100%",
             objectFit: "cover",
             position: "absolute",
             top: 0,
@@ -171,44 +172,45 @@ export const VideoContent: React.FC = () => {
         />
       )}
 
-      <div className="absolute top-0 z-10  p-8 space-y-6">
-        <h1 className="text-white text-2xl font-semibold mb-8">
-          Country Scramble Quiz
-        </h1>
+     <div className="absolute top-0 left-[10px] z-10 p-8 w-[400px] flex flex-col justify-center items-center">
+  <h1 className="text-white text-2xl font-semibold text-center mb-2">
+    Country Scramble Quiz
+  </h1>
 
-        {currentCaption && (
-          <div className="w-[400px] mb-8">
-            <div className="inline-block text-red-200 text-xl text-center p-4 rounded-xl">
-              {currentCaption.text}
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-6">
-          {!showAnswer ? (
-            <h2 className="text-white text-2xl font-bold text-center">
-              {countries[currentCountryIndex].scrambled}
-            </h2>
-          ) : (
-            <h3 className="text-green-400 text-2xl font-bold text-center">
-              Answer: {countries[currentCountryIndex].original}
-            </h3>
-          )}
-
-          {!showAnswer ? (
-            <h3 className="text-white text-2xl text-center">
-              Revealing in {timer}...
-            </h3>
-          ) : (
-            <h3 className="text-green-400 text-4xl font-bold text-center">
-              Answer: {countries[currentCountryIndex].original}
-            </h3>
-          )}
-        </div>
+  {currentCaption && (
+    <div className="w-full mb-8">
+      <div className="inline-block text-red-800 text-xl text-center p-4 rounded-xl">
+        {currentCaption.text}
       </div>
+    </div>
+  )}
+
+  <div className="space-y-6">
+    {!showAnswer ? (
+      <h2 className="text-white text-[14px] font-bold text-center">
+        {countries[currentCountryIndex].scrambled}
+      </h2>
+    ) : (
+      <h3 className="text-green-400 text-[14px] font-bold text-center">
+        Answer: {countries[currentCountryIndex].original}
+      </h3>
+    )}
+
+    {!showAnswer ? (
+      <h3 className="text-white text-[14px] text-center">
+        Revealing in {timer}...
+      </h3>
+    ) : (
+      <h3 className="text-green-400 text-4xl font-bold text-center">
+        Answer: {countries[currentCountryIndex].original}
+      </h3>
+    )}
+  </div>
+</div>
+
 
       <div
-        className="absolute left-8 top-8 text-white text-lg font-medium space-y-4"
+        className="absolute left-8 top-[10%] text-white text-lg font-medium space-y-4"
         style={{ maxHeight: "90%", overflowY: "auto" }}
       >
         <h3 className="font-semibold text-xl mb-4">Answered Countries:</h3>
