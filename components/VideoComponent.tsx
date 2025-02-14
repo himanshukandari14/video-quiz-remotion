@@ -183,7 +183,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         width,
         height,
         position: "relative",
-        borderRadius:'28px',
+        borderRadius: "28px",
         overflow: "hidden",
         display: "flex",
         justifyContent: "center",
@@ -191,7 +191,6 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         flexDirection: "column",
         fontFamily: font,
         color: themeColor,
-       
       }}
       className=" rounded-[28px] flex align-center to-black"
     >
@@ -213,10 +212,17 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
       )}
 
       <div className="absolute top-0 left-[10px] z-10 w-[400px] flex flex-col justify-center items-center">
-        <h1 className="text-2xl font-bold bg-white text-red-400 px-4 rounded-md mt-2 text-center mb-2">{quizTitle}</h1>
+        <h1 className="text-2xl font-bold bg-white text-red-400 px-4 rounded-md mt-2 text-center mb-2">
+          {quizTitle}
+        </h1>
 
         <div className="space-y-0">
-          <h2 className="text-[14px] font-bold text-center">{gameState.message}</h2>
+          <h2
+            style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.4)" }}
+            className="text-[14px] font-bold text-center"
+          >
+            {gameState.message}
+          </h2>
           {gameState.phase === "countdown" && (
             <h3 className="text-lg text-center mt-2">{timer}</h3>
           )}
@@ -231,13 +237,20 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           <h3 className="font-semibold text-xl mb-4">Answered Countries:</h3>
           <ul>
             {answeredCountries.map((country, index) => (
-              <li key={index} className={`mb-2 text-white rounded-md px-2 ${
-                index % 5 === 0 ? 'bg-red-500' :
-                index % 5 === 1 ? 'bg-green-500' :
-                index % 5 === 2 ? 'bg-blue-500' :
-                index % 5 === 3 ? 'bg-yellow-500' :
-                'bg-purple-500'
-              }`}>{`${index + 1}. ${country}`}</li>
+              <li
+                key={index}
+                className={`mb-2 text-white rounded-md px-2 ${
+                  index % 5 === 0
+                    ? "bg-red-500"
+                    : index % 5 === 1
+                    ? "bg-green-500"
+                    : index % 5 === 2
+                    ? "bg-blue-500"
+                    : index % 5 === 3
+                    ? "bg-yellow-500"
+                    : "bg-purple-500"
+                }`}
+              >{`${index + 1}. ${country}`}</li>
             ))}
           </ul>
         </div>
