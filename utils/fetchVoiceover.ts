@@ -2,7 +2,7 @@ import axios from "axios";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const fetchVoiceover = async (text: string, retries = 3) => {
+export const fetchVoiceover = async (text: string,voiceId:string, retries = 3) => {
   const ELEVENLABS_API_KEY = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY;
 
   for (let i = 0; i < retries; i++) {
@@ -11,7 +11,7 @@ export const fetchVoiceover = async (text: string, retries = 3) => {
       await delay(1000 * (i + 1));
 
       const response = await axios.post(
-        "https://api.elevenlabs.io/v1/text-to-speech/IKne3meq5aSn9XLyUdCD?output_format=mp3_44100_128",
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
         {
           text: text,
           model_id: "eleven_multilingual_v2",

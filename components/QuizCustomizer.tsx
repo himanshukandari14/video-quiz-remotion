@@ -33,7 +33,7 @@ interface QuizCustomizerProps {
 
 const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
   const [quizTitle, setQuizTitle] = useState("Country Scramble Quiz");
-  const [voiceover, setVoiceover] = useState("Default");
+  const [voiceover, setVoiceover] = useState("Default"); // This state tracks the selected voice type
   const [background, setBackground] = useState<string | null>(null);
   const [themeColor, setThemeColor] = useState("#ffffff");
   const [font, setFont] = useState("Arial");
@@ -50,27 +50,27 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
     }
   };
 
-  const preProcessAudio = async (countries: string[]) => {
+  const preProcessAudio = async (countries: string[], voiceId: string) => {
     try {
       // Generate intro audio
       const introText = "Hello! Can you unscramble 10 countries? Let's go!";
-      const introAudio = await fetchVoiceover(introText);
+      const introAudio = await fetchVoiceover(introText, voiceId);
 
       // Generate "next question" audio
       const nextQuestionText = "Here's the next one";
-      const nextQuestionAudio = await fetchVoiceover(nextQuestionText);
+      const nextQuestionAudio = await fetchVoiceover(nextQuestionText, voiceId);
 
       // Generate reveal audios
       const revealAudios = await Promise.all(
         countries.map(async (country) => {
           const revealText = `It's ${country}!`;
-          return fetchVoiceover(revealText);
+          return fetchVoiceover(revealText, voiceId);
         })
       );
 
       // Generate outro audio
       const outroText = "Thank you for playing! Comment below with your score!";
-      const outroAudio = await fetchVoiceover(outroText);
+      const outroAudio = await fetchVoiceover(outroText, voiceId);
 
       return {
         intro: introAudio,
@@ -94,8 +94,8 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
         .sort(() => 0.5 - Math.random()) // Shuffle the array
         .slice(0, 10); // Pick 10 random countries
 
-      // Pre-process all audio content
-      const audioUrls = await preProcessAudio(shuffledCountries);
+      // Pre-process all audio content with selected voice type
+      const audioUrls = await preProcessAudio(shuffledCountries, voiceover);
 
       onQuizGenerated({
         quizTitle,
@@ -115,9 +115,8 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
     }
   };
 
-
   return (
-    <div className="p-6 flex flex-col  gap-6 justify-center align-center">
+    <div className="p-6 flex flex-col gap-6 justify-center align-center">
       <Card>
         <CardContent className="flex flex-col gap-4 mt-4">
           <Input
@@ -135,12 +134,12 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
               <SelectValue placeholder="Select Voiceover" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Default">Default</SelectItem>
-              <SelectItem value="AI Voice 1">AI Voice 1</SelectItem>
-              <SelectItem value="AI Voice 2">AI Voice 2</SelectItem>
+              <SelectItem value="Default">George</SelectItem>
+              <SelectItem value="EXAVITQu4vr4xnSDxMaL">Sarah</SelectItem>
+              <SelectItem value="FGY2WhTYpPnrIDTdsKH5">Laurah</SelectItem>
             </SelectContent>
           </Select>
-          <input
+          <Input
             type="file"
             accept="image/*"
             onChange={handleBackgroundUpload}
