@@ -7,11 +7,15 @@ import QuizRenderer from "@/components/VideoComponent";
 import { Card, CardContent } from "@/components/ui/card";
 import Spline from "@splinetool/react-spline";
 
+interface QuizConfig {
+  title: string;
+  questions: { question: string; options: string[]; answer: string }[];
+}
+
 export default function Home() {
-  const [quizConfig, setQuizConfig] = useState(null);
+  const [quizConfig, setQuizConfig] = useState<QuizConfig | null>(null);
 
-
-  const handleQuizGenerated = (config: never) => {
+  const handleQuizGenerated = (config: QuizConfig) => {
     setQuizConfig(config);
   };
 
@@ -19,12 +23,18 @@ export default function Home() {
     if (!quizConfig) return;
 
     try {
-      // Use the Remotion Player's imperative API to render
       const video = document.querySelector("video");
       if (!video) return;
 
-      // Create a MediaRecorder to capture the video
-      const stream = video.captureStream();
+      // Safely check if captureStream is available
+      const stream = (
+        video as HTMLVideoElement & { captureStream?: () => MediaStream }
+      ).captureStream?.();
+      if (!stream) {
+        console.error("captureStream is not supported on this browser.");
+        return;
+      }
+
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: "video/webm",
       });
@@ -43,39 +53,30 @@ export default function Home() {
         document.body.removeChild(a);
       };
 
-      // Start recording
       mediaRecorder.start();
-
-      // Play the video
       await video.play();
-
-      // Stop recording after the video duration
       setTimeout(() => {
         mediaRecorder.stop();
         video.pause();
-      }, (300 / 30) * 1000); // Duration in frames / fps * 1000 for milliseconds
+      }, (300 / 30) * 1000);
     } catch (error) {
       console.error("Failed to export video:", error);
     }
   };
 
-return (
+  return (
     <main className="min-h-screen relative">
-      {/* Spline Background */}
       <div className="fixed inset-0 z-0">
         <Spline scene="https://prod.spline.design/NK6xV8F92uNHB-Gg/scene.splinecode" />
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center">
         <RemotionRoot />
-        
         <div className="w-full max-w-7xl mx-auto p-4">
           <div className="flex flex-col gap-8">
             <Card className="border-none bg-background/80 backdrop-blur-md">
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Customizer Section */}
                   <div className="w-full max-w-2xl flex flex-col justidy-start gap-8 mx-auto lg:max-w-none px-[20px]">
                     <h2 className="text-2xl font-semibold mb-6">
                       Customize Your Quiz
@@ -83,7 +84,6 @@ return (
                     <QuizCustomizer onQuizGenerated={handleQuizGenerated} />
                   </div>
 
-                  {/* Preview Section */}
                   <div className="w-full flex flex-col items-center justify-start">
                     <h2 className="text-2xl font-semibold mb-6">Preview</h2>
                     {quizConfig ? (
@@ -121,4 +121,3 @@ return (
     </main>
   );
 }
-
