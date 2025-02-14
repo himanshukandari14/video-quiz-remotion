@@ -183,6 +183,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         width,
         height,
         position: "relative",
+        borderRadius:'28px',
         overflow: "hidden",
         display: "flex",
         justifyContent: "center",
@@ -190,20 +191,23 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         flexDirection: "column",
         fontFamily: font,
         color: themeColor,
+       
       }}
-      className="bg-gradient-to-b from-blue-900 to-black"
+      className=" rounded-[28px] flex align-center to-black"
     >
       {backgroundUrl && (
         <Img
           src={backgroundUrl}
           style={{
-            width: "100%",
-            height: "33%",
+            width: "37%",
+            height: "32%",
             objectFit: "cover",
             position: "absolute",
+            borderRadius: "28px", // This already rounds all corners
             top: 0,
             left: 0,
             zIndex: 0,
+            overflow: "hidden", // Ensures content inside respects border-radius
           }}
         />
       )}

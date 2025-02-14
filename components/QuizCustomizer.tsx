@@ -115,9 +115,9 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
   };
 
   return (
-    <div className="p-6 flex flex-col gap-6">
+    <div className="p-6 flex flex-col  gap-6 justify-center align-center">
       <Card>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4 mt-4">
           <Input
             value={quizTitle}
             onChange={(e) => setQuizTitle(e.target.value)}
