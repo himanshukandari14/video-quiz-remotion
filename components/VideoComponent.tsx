@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useVideoConfig, Audio, Img, useCurrentFrame } from "remotion";
+import { useVideoConfig, Audio, Img } from "remotion";
 import { generateBackgroundImage } from "@/utils/generateBackground";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -46,8 +46,6 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
   font,
   countries,
   audioUrls,
-  onExport,
-  isPreview = true,
 }) => {
   const { width, height } = useVideoConfig();
  
