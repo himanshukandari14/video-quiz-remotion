@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import countriesData from "../data/countries.json";
+import { fetchVoiceover } from "../utils/fetchVoiceover";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,12 @@ interface QuizCustomizerProps {
     themeColor: string;
     font: string;
     countries: string[];
+    audioUrls: {
+      intro?: string;
+      nextQuestion?: string;
+      reveals?: string[];
+      outro?: string;
+    };
   }) => void;
 }
 
@@ -30,6 +37,8 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
   const [background, setBackground] = useState<string | null>(null);
   const [themeColor, setThemeColor] = useState("#ffffff");
   const [font, setFont] = useState("Arial");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -41,19 +50,68 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
     }
   };
 
-  const handleGenerateQuiz = () => {
-    const shuffledCountries = countriesData.countryList
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 10);
-    console.log("shuffledCountries before onQuizGenerated:", shuffledCountries);
-    onQuizGenerated({
-      quizTitle,
-      voiceover,
-      background,
-      themeColor,
-      font,
-      countries: shuffledCountries,
-    });
+  const preProcessAudio = async (countries: string[]) => {
+    try {
+      // Generate intro audio
+      const introText = "Hello! Can you unscramble 10 countries? Let's go!";
+      const introAudio = await fetchVoiceover(introText);
+
+      // Generate "next question" audio
+      const nextQuestionText = "Here's the next one, let's go!";
+      const nextQuestionAudio = await fetchVoiceover(nextQuestionText);
+
+      // Generate reveal audios
+      const revealAudios = await Promise.all(
+        countries.map(async (country) => {
+          const revealText = `It's ${country}!`;
+          return fetchVoiceover(revealText);
+        })
+      );
+
+      // Generate outro audio
+      const outroText = "Thank you for playing! Comment below with your score!";
+      const outroAudio = await fetchVoiceover(outroText);
+
+      return {
+        intro: introAudio,
+        nextQuestion: nextQuestionAudio,
+        reveals: revealAudios,
+        outro: outroAudio,
+      };
+    } catch (error) {
+      console.error("Failed to pre-process audio:", error);
+      throw new Error("Failed to generate audio content");
+    }
+  };
+
+  const handleGenerateQuiz = async () => {
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const shuffledCountries = countriesData.countryList
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 10);
+
+      // Pre-process all audio content
+      const audioUrls = await preProcessAudio(shuffledCountries);
+
+      onQuizGenerated({
+        quizTitle,
+        voiceover,
+        background,
+        themeColor,
+        font,
+        countries: shuffledCountries,
+        audioUrls,
+      });
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to generate quiz"
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -64,8 +122,13 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
             value={quizTitle}
             onChange={(e) => setQuizTitle(e.target.value)}
             placeholder="Quiz Title"
+            disabled={isProcessing}
           />
-          <Select value={voiceover} onValueChange={setVoiceover}>
+          <Select
+            value={voiceover}
+            onValueChange={setVoiceover}
+            disabled={isProcessing}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select Voiceover" />
             </SelectTrigger>
@@ -79,13 +142,15 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
             type="file"
             accept="image/*"
             onChange={handleBackgroundUpload}
+            disabled={isProcessing}
           />
           <Input
             type="color"
             value={themeColor}
             onChange={(e) => setThemeColor(e.target.value)}
+            disabled={isProcessing}
           />
-          <Select value={font} onValueChange={setFont}>
+          <Select value={font} onValueChange={setFont} disabled={isProcessing}>
             <SelectTrigger>
               <SelectValue placeholder="Select Font" />
             </SelectTrigger>
@@ -95,7 +160,10 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
               <SelectItem value="Times New Roman">Times New Roman</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleGenerateQuiz}>Generate Quiz</Button>
+          <Button onClick={handleGenerateQuiz} disabled={isProcessing}>
+            {isProcessing ? "Processing..." : "Generate Quiz"}
+          </Button>
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
         </CardContent>
       </Card>
     </div>

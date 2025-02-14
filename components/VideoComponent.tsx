@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useVideoConfig, Audio, Img } from "remotion";
-import { fetchVoiceover } from "../utils/fetchVoiceover";
 import { generateBackgroundImage } from "@/utils/generateBackground";
 
 interface QuizRendererProps {
@@ -11,6 +10,29 @@ interface QuizRendererProps {
   themeColor: string;
   font: string;
   countries: string[];
+  audioUrls?: {
+    intro?: string;
+    nextQuestion?: string;
+    reveals?: string[];
+    outro?: string;
+  };
+}
+
+interface AudioState {
+  currentAudio: string | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+interface GameState {
+  phase:
+    | "intro"
+    | "question-intro"
+    | "question"
+    | "countdown"
+    | "reveal"
+    | "outro";
+  message: string;
 }
 
 export const QuizRenderer: React.FC<QuizRendererProps> = ({
@@ -19,37 +41,24 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
   themeColor,
   font,
   countries,
+  audioUrls,
 }) => {
   const { width, height } = useVideoConfig();
   const [scrambled, setScrambled] = useState("");
-  const [voiceoverUrl, setVoiceoverUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentCountryIndex, setCurrentCountryIndex] = useState(-1); // Start with -1 for intro phase
-  const [showAnswer, setShowAnswer] = useState(false);
+  const [currentCountryIndex, setCurrentCountryIndex] = useState(-1);
   const [timer, setTimer] = useState(3);
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(background);
   const [answeredCountries, setAnsweredCountries] = useState<string[]>([]);
-  const [introPhase, setIntroPhase] = useState(true); // Intro phase state
+  const [gameState, setGameState] = useState<GameState>({
+    phase: "intro",
+    message: "Hello! Can you unscramble 10 countries? Let's go!",
+  });
+  const [audioState, setAudioState] = useState<AudioState>({
+    currentAudio: null,
+    isLoading: false,
+    error: null,
+  });
 
-  // Generate voiceover for intro or quiz
-  const generateVoiceover = useCallback(async (text: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const url = await fetchVoiceover(text);
-      if (typeof url === 'string') {
-        setVoiceoverUrl(url);
-      }
-    } catch (err) {
-      console.error("Failed to generate voiceover:", err);
-      setError("Failed to generate audio");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Initialize video and play intro
   useEffect(() => {
     const initializeVideo = async () => {
       try {
@@ -58,74 +67,115 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           setBackgroundUrl(backgroundImageUrl);
         }
 
-        // Play intro voiceover
-        const introText = `Welcome to ${quizTitle}! Can you guess the 10 scrambled countries? Let's go!`;
-        await generateVoiceover(introText);
+        // Play intro audio
+        if (audioUrls?.intro) {
+          setAudioState((prev) => ({
+            ...prev,
+            currentAudio: audioUrls.intro,
+          }));
+        }
 
-        // After intro, start the quiz
+        // Move to first question after intro
         setTimeout(() => {
-          setIntroPhase(false); // End intro phase
-          setCurrentCountryIndex(0); // Start quiz
-        }, 3000); // Assume intro duration is 3 seconds
+          setGameState({
+            phase: "question-intro",
+            message: "Here's the first one, let's go!",
+          });
+          setCurrentCountryIndex(0);
+        }, 3000);
       } catch (error) {
         console.error("Initialization failed:", error);
-        setError("Initialization failed");
+        setAudioState((prev) => ({ ...prev, error: "Initialization failed" }));
       }
     };
 
     initializeVideo();
-  }, [backgroundUrl, quizTitle, generateVoiceover]);
+  }, [backgroundUrl, audioUrls]);
 
-  // Handle quiz logic
+  // Handle game state progression
   useEffect(() => {
-    if (introPhase || currentCountryIndex < 0) return; // Skip if still in intro phase
-    let scrambled = "";
-    const handleQuestion = async () => {
-      const country = countries[currentCountryIndex];
-      const shuffled = country
-        .split('')
-        .sort(() => 0.5 - Math.random())
-        .join('');
-      setScrambled(shuffled);
-      const questionText = `Can you name this scrambled country? Your word is ${shuffled}`;
-      await generateVoiceover(questionText);
+    if (gameState.phase === "question-intro") {
+      // Show "Here's the next one" message
+      if (audioUrls?.nextQuestion) {
+        setAudioState((prev) => ({
+          ...prev,
+          currentAudio: audioUrls.nextQuestion,
+        }));
+      }
 
-      // Start countdown
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev === 1) {
-            clearInterval(interval);
-            setShowAnswer(true);
-            console.log("Timer reached 0, showAnswer set to true");
-            return 0;
-          }
-          return prev - 1;
+      // Move to question after 2 seconds
+      setTimeout(() => {
+        const country = countries[currentCountryIndex];
+        const shuffled = country
+          .split("")
+          .sort(() => 0.5 - Math.random())
+          .join("");
+        setScrambled(shuffled);
+        setGameState({
+          phase: "question",
+          message: shuffled,
         });
-      }, 1000);
+      }, 2000);
+    }
 
-      return () => clearInterval(interval);
-    };
+    if (gameState.phase === "question") {
+      // Start countdown after 0.5 seconds of showing scrambled word
+      setTimeout(() => {
+        setGameState({
+          phase: "countdown",
+          message: scrambled,
+        });
 
-    handleQuestion();
-  }, [currentCountryIndex, introPhase, generateVoiceover, countries]);
+        const interval = setInterval(() => {
+          setTimer((prev) => {
+            if (prev === 1) {
+              clearInterval(interval);
+              setGameState({
+                phase: "reveal",
+                message: `It's ${countries[currentCountryIndex]}!`,
+              });
+              if (audioUrls?.reveals?.[currentCountryIndex]) {
+                setAudioState((prev) => ({
+                  ...prev,
+                  currentAudio: audioUrls.reveals[currentCountryIndex],
+                }));
+              }
+              return 3;
+            }
+            return prev - 1;
+          });
+        }, 1000);
 
-  // Move to next country after answer is shown
-  useEffect(() => {
-    if (showAnswer) {
+        return () => clearInterval(interval);
+      }, 500);
+    }
+
+    if (gameState.phase === "reveal") {
       setAnsweredCountries((prev) => [...prev, countries[currentCountryIndex]]);
 
-      const timeout = setTimeout(() => {
+      // Move to next question or outro
+      setTimeout(() => {
         if (currentCountryIndex < countries.length - 1) {
           setCurrentCountryIndex((prev) => prev + 1);
-          setShowAnswer(false);
-          setTimer(3);
+          setGameState({
+            phase: "question-intro",
+            message: "Here's the next one!",
+          });
+        } else {
+          setGameState({
+            phase: "outro",
+            message: "Thank you for playing! Comment below with your score!",
+          });
+          if (audioUrls?.outro) {
+            setAudioState((prev) => ({
+              ...prev,
+              currentAudio: audioUrls.outro,
+            }));
+          }
         }
-      }, 2000); // Wait 2 seconds before moving to the next country
-
-      return () => clearTimeout(timeout);
+      }, 2000);
     }
-    console.log("showAnswer:", showAnswer, "currentCountryIndex:", currentCountryIndex, "countries.length:", countries.length);
-  }, [showAnswer, currentCountryIndex, countries]);
+  }, [gameState.phase, currentCountryIndex, countries, audioUrls, scrambled]);
 
   return (
     <div
@@ -158,77 +208,39 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         />
       )}
 
-      {/* Intro Screen */}
-      {introPhase && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-5xl font-bold text-center">
-            Welcome to {quizTitle}!
-            <br />
-            <span className="text-3xl mt-4 block">
-              Can you guess the 10 scrambled countries? Let&apos;s go!
-            </span>
-          </h1>
+      <div className="absolute top-0 left-[10px] z-10 w-[400px] flex flex-col justify-center items-center">
+        <h1 className="text-2xl font-semibold text-center mb-2">{quizTitle}</h1>
+
+        <div className="space-y-0">
+          <h2 className="text-xl font-bold text-center">{gameState.message}</h2>
+          {gameState.phase === "countdown" && (
+            <h3 className="text-lg text-center mt-2">{timer}</h3>
+          )}
+        </div>
+      </div>
+
+      {gameState.phase !== "intro" && gameState.phase !== "outro" && (
+        <div
+          className="absolute left-8 top-[10%] text-lg font-medium space-y-0"
+          style={{ maxHeight: "90%", overflowY: "auto" }}
+        >
+          <h3 className="font-semibold text-xl mb-4">Answered Countries:</h3>
+          <ul>
+            {answeredCountries.map((country, index) => (
+              <li key={index} className="mb-2">{`${index + 1}. ${country}`}</li>
+            ))}
+          </ul>
         </div>
       )}
 
-      {/* Quiz Content */}
-      {!introPhase && (
-        <>
-          <div className="absolute top-0 left-[10px] z-10 w-[400px] flex flex-col justify-center items-center">
-            <h1 className="text-2xl font-semibold text-center mb-2">
-              {quizTitle}
-            </h1>
-
-            <div className="space-y-0">
-              {!showAnswer ? (
-                <>
-                  <h2 className="text-[14px] font-bold text-center">
-                    {scrambled}
-                  </h2>
-                  <h3 className="text-[14px] text-center">
-                    Revealing in {timer}...
-                  </h3>
-                </>
-              ) : (
-                <h3 className="text-green-400 text-[14px] font-bold text-center">
-                  Answer: {countries[currentCountryIndex]}
-                </h3>
-              )}
-            </div>
-          </div>
-
-          <div
-            className="absolute left-8 top-[10%] text-lg font-medium space-y-0"
-            style={{ maxHeight: "90%", overflowY: "auto" }}
-          >
-            <h3 className="font-semibold text-xl mb-4">Answered Countries:</h3>
-            <ul>
-              {answeredCountries.map((country, index) => (
-                <li key={index} className="mb-2">{`${
-                  index + 1
-                }. ${country}`}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="absolute bottom-8 w-full text-center text-lg">
-            {currentCountryIndex + 1} / 10
-          </div>
-        </>
-      )}
-
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="text-white text-xl">{error}</div>
+      {gameState.phase !== "intro" && gameState.phase !== "outro" && (
+        <div className="absolute bottom-8 w-full text-center text-lg">
+          {currentCountryIndex + 1} / 10
         </div>
       )}
 
-      {voiceoverUrl && !error && <Audio src={voiceoverUrl} startFrom={0} />}
-
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="text-white text-xl">Loading...</div>
-        </div>
+      {audioState.currentAudio && !audioState.error && (
+        <Audio src={audioState.currentAudio} startFrom={0} />
       )}
     </div>
   );
