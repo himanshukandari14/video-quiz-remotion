@@ -261,7 +261,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         <div className="space-y-0">
           <h2
             style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.4)" }}
-            className="text-[14px] font-bold text-center"
+            className="text-[18px] font-bold text-center"
           >
             {gameState.message}
           </h2>

@@ -33,7 +33,7 @@ interface QuizCustomizerProps {
 
 const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
   const [quizTitle, setQuizTitle] = useState("Country Scramble Quiz");
-  const [voiceover, setVoiceover] = useState("Default"); // This state tracks the selected voice type
+  const [voiceover, setVoiceover] = useState("JBFqnCBsd6RMkjVDRZzb");
   const [background, setBackground] = useState<string | null>(null);
   const [themeColor, setThemeColor] = useState("#ffffff");
   const [font, setFont] = useState("Arial");
@@ -134,7 +134,7 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
               <SelectValue placeholder="Select Voiceover" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Default">George</SelectItem>
+              <SelectItem value="JBFqnCBsd6RMkjVDRZzb">George</SelectItem>
               <SelectItem value="EXAVITQu4vr4xnSDxMaL">Sarah</SelectItem>
               <SelectItem value="FGY2WhTYpPnrIDTdsKH5">Laurah</SelectItem>
             </SelectContent>
@@ -162,7 +162,7 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
             </SelectContent>
           </Select>
           <Button onClick={handleGenerateQuiz} disabled={isProcessing}>
-            {isProcessing ? "Processing..." : "Generate Quiz"}
+            {isProcessing ? "Cooking Awesomenes..." : "Generate Quiz"}
           </Button>
           {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
         </CardContent>

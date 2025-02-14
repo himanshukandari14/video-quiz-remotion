@@ -2,19 +2,44 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js v18 or higher
+- npm v9 or higher
+- FFmpeg (for video processing with Remotion)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/your-username/video-quiz.git
+cd video-quiz
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Install FFmpeg (required for Remotion video processing):
+```bash
+# For Windows (using chocolatey):
+choco install ffmpeg
+
+# For macOS (using homebrew):
+brew install ffmpeg
+
+# For Linux (Debian/Ubuntu):
+sudo apt install ffmpeg
+```
+
+### Running the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to start the application.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
