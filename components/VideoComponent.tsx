@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useVideoConfig, Audio, Img, useCurrentFrame } from "remotion";
 import { generateBackgroundImage } from "@/utils/generateBackground";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 interface QuizRendererProps {
   quizTitle: string;
@@ -64,7 +65,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     isLoading: false,
     error: null,
   });
-  const [isExporting, setIsExporting] = useState(false);
+
   const [isImageReady, setIsImageReady] = useState(false); // Track if the image is ready
 
   useEffect(() => {
@@ -244,21 +245,24 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
               {i + 1}
             </div>
             {answeredCountries[i] && (
-              <div
-                className={`px-4 py-1 rounded-md text-white font-medium animate-fadeIn ${
-                  i % 5 === 0
-                    ? "bg-red-500"
-                    : i % 5 === 1
-                    ? "bg-green-500"
-                    : i % 5 === 2
-                    ? "bg-blue-500"
-                    : i % 5 === 3
-                    ? "bg-yellow-500"
-                    : "bg-purple-500"
-                }`}
-              >
-                {answeredCountries[i]}
-              </div>
+              <motion.div
+  initial={{ opacity: 0, x: -50 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.5, ease: "easeOut" }}
+  className={`px-4 py-1 rounded-md text-white font-medium ${
+    i % 5 === 0
+      ? "bg-red-500"
+      : i % 5 === 1
+      ? "bg-green-500"
+      : i % 5 === 2
+      ? "bg-blue-500"
+      : i % 5 === 3
+      ? "bg-yellow-500"
+      : "bg-purple-500"
+  }`}
+>
+  {answeredCountries[i]}
+</motion.div>
             )}
           </div>
         ))}
@@ -272,7 +276,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         <div className="space-y-0">
           <h2
             style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.4)" }}
-            className="text-[18px] font-bold text-center"
+            className="text-[16px] font-bold text-center"
           >
             {gameState.message}
           </h2>
