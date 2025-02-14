@@ -71,7 +71,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         if (audioUrls?.intro) {
           setAudioState((prev) => ({
             ...prev,
-            currentAudio: audioUrls.intro,
+            currentAudio: audioUrls.intro || null,
           }));
         }
 
@@ -99,7 +99,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
       if (audioUrls?.nextQuestion) {
         setAudioState((prev) => ({
           ...prev,
-          currentAudio: audioUrls.nextQuestion,
+          currentAudio: audioUrls.nextQuestion || null,
         }));
       }
 
@@ -137,7 +137,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
               if (audioUrls?.reveals?.[currentCountryIndex]) {
                 setAudioState((prev) => ({
                   ...prev,
-                  currentAudio: audioUrls.reveals[currentCountryIndex],
+                  currentAudio: audioUrls.reveals[currentCountryIndex] || null,
                 }));
               }
               return 3;
@@ -169,7 +169,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           if (audioUrls?.outro) {
             setAudioState((prev) => ({
               ...prev,
-              currentAudio: audioUrls.outro,
+              currentAudio: audioUrls.outro || null,
             }));
           }
         }
@@ -231,7 +231,13 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           <h3 className="font-semibold text-xl mb-4">Answered Countries:</h3>
           <ul>
             {answeredCountries.map((country, index) => (
-              <li key={index} className="mb-2">{`${index + 1}. ${country}`}</li>
+              <li key={index} className={`mb-2 text-white rounded-md px-2 ${
+                index % 5 === 0 ? 'bg-red-500' :
+                index % 5 === 1 ? 'bg-green-500' :
+                index % 5 === 2 ? 'bg-blue-500' :
+                index % 5 === 3 ? 'bg-yellow-500' :
+                'bg-purple-500'
+              }`}>{`${index + 1}. ${country}`}</li>
             ))}
           </ul>
         </div>
