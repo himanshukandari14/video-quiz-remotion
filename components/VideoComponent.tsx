@@ -18,8 +18,8 @@ interface QuizRendererProps {
     reveals?: string[];
     outro?: string;
   };
-  onExport?: () => void;
-  isPreview?: boolean;
+
+  // isPreview?: boolean;
 }
 
 interface AudioState {
@@ -50,7 +50,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
   isPreview = true,
 }) => {
   const { width, height } = useVideoConfig();
-  const frame = useCurrentFrame();
+ 
   const [scrambled, setScrambled] = useState("");
   const [currentCountryIndex, setCurrentCountryIndex] = useState(-1);
   const [timer, setTimer] = useState(3);
