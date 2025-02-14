@@ -57,7 +57,7 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
       const introAudio = await fetchVoiceover(introText);
 
       // Generate "next question" audio
-      const nextQuestionText = "Here's the next one, let's go!";
+      const nextQuestionText = "Here's the next one";
       const nextQuestionAudio = await fetchVoiceover(nextQuestionText);
 
       // Generate reveal audios
