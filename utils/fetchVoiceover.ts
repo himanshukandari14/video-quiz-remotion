@@ -25,6 +25,7 @@ export const fetchVoiceover = async (text: string, retries = 3) => {
         }
       );
 
+      console.log(response,"ye hai response")
       // Convert blob to URL
       const audioBlob = new Blob([response.data], { type: "audio/mpeg" });
       return URL.createObjectURL(audioBlob);
