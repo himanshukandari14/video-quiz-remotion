@@ -11,7 +11,7 @@ export default function Home() {
   const [quizConfig, setQuizConfig] = useState(null);
 
 
-  const handleQuizGenerated = (config: any) => {
+  const handleQuizGenerated = (config: never) => {
     setQuizConfig(config);
   };
 
