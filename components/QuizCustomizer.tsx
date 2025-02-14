@@ -89,9 +89,10 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
     setError(null);
 
     try {
-      const shuffledCountries = countriesData.countryList
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 10);
+      // Shuffle countries list each time
+      const shuffledCountries = [...countriesData.countryList]
+        .sort(() => 0.5 - Math.random()) // Shuffle the array
+        .slice(0, 10); // Pick 10 random countries
 
       // Pre-process all audio content
       const audioUrls = await preProcessAudio(shuffledCountries);
@@ -113,6 +114,7 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
       setIsProcessing(false);
     }
   };
+
 
   return (
     <div className="p-6 flex flex-col  gap-6 justify-center align-center">

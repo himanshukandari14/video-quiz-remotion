@@ -108,6 +108,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           ...prev,
           currentAudio: audioUrls.nextQuestion || null,
         }));
+        console.log(gameState.phase,"question-intro")
       }
 
       // Move to question after 2.5 seconds
@@ -126,6 +127,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
 
     if (gameState.phase === "question") {
+       console.log(gameState.phase, "question-only");
       // Start countdown after 1 second of showing scrambled word
       setTimeout(() => {
         setGameState({
@@ -158,6 +160,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
 
     if (gameState.phase === "reveal") {
+       console.log(gameState.phase, "reveal");
       setAnsweredCountries((prev) => [...prev, countries[currentCountryIndex]]);
 
       // Move to next question or outro after 3 seconds
@@ -184,6 +187,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
   }, [gameState.phase, currentCountryIndex, countries, audioUrls, scrambled]);
 
+  
   return (
     <div
       style={{
