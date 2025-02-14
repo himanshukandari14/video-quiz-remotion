@@ -57,7 +57,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
   const [answeredCountries, setAnsweredCountries] = useState<string[]>([]);
   const [gameState, setGameState] = useState<GameState>({
     phase: "intro",
-    message: "Hello! Can you unscramble 10 countries? Let's go!",
+    message: "Hello! Can you unscramble 10 countries?Let's go!",
   });
   const [audioState, setAudioState] = useState<AudioState>({
     currentAudio: null,
@@ -65,6 +65,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     error: null,
   });
   const [isExporting, setIsExporting] = useState(false);
+  const [isImageReady, setIsImageReady] = useState(false); // Track if the image is ready
 
   useEffect(() => {
     const initializeVideo = async () => {
@@ -72,6 +73,15 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         if (!backgroundUrl) {
           const { backgroundImageUrl } = await generateBackgroundImage();
           setBackgroundUrl(backgroundImageUrl);
+
+          // Wait for the image to load
+          const img = new Image();
+          img.src = backgroundImageUrl;
+          img.onload = () => {
+            setIsImageReady(true); // Set image ready state to true
+          };
+        } else {
+          setIsImageReady(true); // If background is provided, set image ready immediately
         }
 
         // Play intro audio
@@ -108,7 +118,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           ...prev,
           currentAudio: audioUrls.nextQuestion || null,
         }));
-        console.log(gameState.phase,"question-intro")
+        console.log(gameState.phase, "question-intro");
       }
 
       // Move to question after 2.5 seconds
@@ -127,7 +137,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
 
     if (gameState.phase === "question") {
-       console.log(gameState.phase, "question-only");
+      console.log(gameState.phase, "question-only");
       // Start countdown after 1 second of showing scrambled word
       setTimeout(() => {
         setGameState({
@@ -160,7 +170,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
 
     if (gameState.phase === "reveal") {
-       console.log(gameState.phase, "reveal");
+      console.log(gameState.phase, "reveal");
       setAnsweredCountries((prev) => [...prev, countries[currentCountryIndex]]);
 
       // Move to next question or outro after 3 seconds
@@ -187,7 +197,11 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
   }, [gameState.phase, currentCountryIndex, countries, audioUrls, scrambled]);
 
-  
+  // Only render the video preview if the image is ready
+  if (!isImageReady) {
+    return null; // Return null or a loading spinner while the image is being generated
+  }
+
   return (
     <div
       style={{
@@ -203,7 +217,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         fontFamily: font,
         color: themeColor,
       }}
-      className=" rounded-[28px] flex align-center to-black"
+      className="rounded-[28px] flex align-center to-black"
     >
       {backgroundUrl && (
         <Img
@@ -225,15 +239,12 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
       {/* Numbers column on the left */}
       <div className="absolute left-8 top-[120px] flex flex-col space-y-4 z-10">
         {Array.from({ length: 10 }, (_, i) => (
-          <div
-            key={i}
-            className="flex items-center space-x-4"
-          >
+          <div key={i} className="flex items-center space-x-4">
             <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white font-bold">
               {i + 1}
             </div>
             {answeredCountries[i] && (
-              <div 
+              <div
                 className={`px-4 py-1 rounded-md text-white font-medium animate-fadeIn ${
                   i % 5 === 0
                     ? "bg-red-500"
@@ -281,42 +292,42 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         <Button
           onClick={async () => {
             try {
-              const video = document.querySelector('video');
+              const video = document.querySelector("video");
               if (!video) return;
-              
+
               // Create a MediaRecorder to capture the video
               const stream = video.captureStream();
               const mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'video/webm'
+                mimeType: "video/webm",
               });
-              
+
               const chunks: BlobPart[] = [];
               mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
               mediaRecorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
+                const blob = new Blob(chunks, { type: "video/webm" });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
+                const a = document.createElement("a");
                 a.href = url;
-                a.download = 'quiz-video.webm';
+                a.download = "quiz-video.webm";
                 document.body.appendChild(a);
                 a.click();
                 URL.revokeObjectURL(url);
                 document.body.removeChild(a);
               };
-              
+
               // Start recording
               mediaRecorder.start();
-              
+
               // Play the video
               await video.play();
-              
+
               // Stop recording after the video duration
               setTimeout(() => {
                 mediaRecorder.stop();
                 video.pause();
               }, (300 / 30) * 1000); // Duration in frames / fps * 1000 for milliseconds
             } catch (error) {
-              console.error('Failed to export video:', error);
+              console.error("Failed to export video:", error);
             }
           }}
           className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md"
