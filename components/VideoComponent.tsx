@@ -213,10 +213,10 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
       )}
 
       <div className="absolute top-0 left-[10px] z-10 w-[400px] flex flex-col justify-center items-center">
-        <h1 className="text-2xl font-semibold text-center mb-2">{quizTitle}</h1>
+        <h1 className="text-2xl font-bold bg-white text-red-400 px-4 rounded-md mt-2 text-center mb-2">{quizTitle}</h1>
 
         <div className="space-y-0">
-          <h2 className="text-xl font-bold text-center">{gameState.message}</h2>
+          <h2 className="text-[14px] font-bold text-center">{gameState.message}</h2>
           {gameState.phase === "countdown" && (
             <h3 className="text-lg text-center mt-2">{timer}</h3>
           )}
@@ -225,7 +225,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
 
       {gameState.phase !== "intro" && gameState.phase !== "outro" && (
         <div
-          className="absolute left-8 top-[10%] text-lg font-medium space-y-0"
+          className="absolute left-8 top-[5%] text-lg font-medium space-y-0"
           style={{ maxHeight: "90%", overflowY: "auto" }}
         >
           <h3 className="font-semibold text-xl mb-4">Answered Countries:</h3>
