@@ -1,4 +1,6 @@
 import { Composition } from "remotion";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
 import { VideoComponent } from "@/components/VideoComponent";
 
 const CountryScramble = () => {
