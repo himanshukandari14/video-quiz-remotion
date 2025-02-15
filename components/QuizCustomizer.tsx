@@ -75,7 +75,7 @@ const QuizCustomizer: React.FC<QuizCustomizerProps> = ({ onQuizGenerated }) => {
       return {
         intro: introAudio,
         nextQuestion: nextQuestionAudio,
-        reveals: revealAudios,
+        reveals: revealAudios as string[],
         outro: outroAudio,
       };
     } catch (error) {

@@ -7,10 +7,22 @@ import QuizRenderer from "@/components/VideoComponent";
 import { Card, CardContent } from "@/components/ui/card";
 import Spline from "@splinetool/react-spline";
 
+// Update interface to match QuizCustomizer's output
 interface QuizConfig {
-  title: string;
-  questions: { question: string; options: string[]; answer: string }[];
+  quizTitle: string;
+  voiceover: string;
+  background: string | null;
+  themeColor: string;
+  font: string;
+  countries: string[];
+  audioUrls: {
+    intro?: string;
+    nextQuestion?: string;
+    reveals?: string[];
+    outro?: string;
+  };
 }
+
 
 export default function Home() {
   const [quizConfig, setQuizConfig] = useState<QuizConfig | null>(null);
@@ -26,10 +38,11 @@ export default function Home() {
       const video = document.querySelector("video");
       if (!video) return;
 
-      // Safely check if captureStream is available
-      const stream = (
-        video as HTMLVideoElement & { captureStream?: () => MediaStream }
-      ).captureStream?.();
+      const streamableVideo = video as HTMLVideoElement & {
+        captureStream?: () => MediaStream;
+      };
+
+      const stream = streamableVideo.captureStream?.();
       if (!stream) {
         console.error("captureStream is not supported on this browser.");
         return;
@@ -54,10 +67,10 @@ export default function Home() {
       };
 
       mediaRecorder.start();
-      await video.play();
+      await streamableVideo.play();
       setTimeout(() => {
         mediaRecorder.stop();
-        video.pause();
+        streamableVideo.pause();
       }, (300 / 30) * 1000);
     } catch (error) {
       console.error("Failed to export video:", error);

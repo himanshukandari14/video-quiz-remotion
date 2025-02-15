@@ -18,8 +18,6 @@ interface QuizRendererProps {
     reveals?: string[];
     outro?: string;
   };
-
-  // isPreview?: boolean;
 }
 
 interface AudioState {
@@ -39,6 +37,11 @@ interface GameState {
   message: string;
 }
 
+// Define a custom type for video element with captureStream
+interface VideoElementWithCapture extends HTMLVideoElement {
+  captureStream(): MediaStream;
+}
+
 export const QuizRenderer: React.FC<QuizRendererProps> = ({
   quizTitle,
   background,
@@ -48,7 +51,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
   audioUrls,
 }) => {
   const { width, height } = useVideoConfig();
- 
+
   const [scrambled, setScrambled] = useState("");
   const [currentCountryIndex, setCurrentCountryIndex] = useState(-1);
   const [timer, setTimer] = useState(3);
@@ -63,8 +66,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     isLoading: false,
     error: null,
   });
-
-  const [isImageReady, setIsImageReady] = useState(false); // Track if the image is ready
+  const [isImageReady, setIsImageReady] = useState(false);
 
   useEffect(() => {
     const initializeVideo = async () => {
@@ -73,17 +75,15 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           const { backgroundImageUrl } = await generateBackgroundImage();
           setBackgroundUrl(backgroundImageUrl);
 
-          // Wait for the image to load
           const img = new Image();
           img.src = backgroundImageUrl;
           img.onload = () => {
-            setIsImageReady(true); // Set image ready state to true
+            setIsImageReady(true);
           };
         } else {
-          setIsImageReady(true); // If background is provided, set image ready immediately
+          setIsImageReady(true);
         }
 
-        // Play intro audio
         if (audioUrls?.intro) {
           setAudioState((prev) => ({
             ...prev,
@@ -91,7 +91,6 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
           }));
         }
 
-        // Move to first question after intro
         setTimeout(() => {
           setGameState({
             phase: "question-intro",
@@ -108,19 +107,15 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     initializeVideo();
   }, [backgroundUrl, audioUrls]);
 
-  // Handle game state progression
   useEffect(() => {
     if (gameState.phase === "question-intro") {
-      // Show "Here's the next one" message
       if (audioUrls?.nextQuestion) {
         setAudioState((prev) => ({
           ...prev,
           currentAudio: audioUrls.nextQuestion || null,
         }));
-        console.log(gameState.phase, "question-intro");
       }
 
-      // Move to question after 2.5 seconds
       setTimeout(() => {
         const country = countries[currentCountryIndex];
         const shuffled = country
@@ -136,8 +131,6 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
 
     if (gameState.phase === "question") {
-      console.log(gameState.phase, "question-only");
-      // Start countdown after 1 second of showing scrambled word
       setTimeout(() => {
         setGameState({
           phase: "countdown",
@@ -146,20 +139,22 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
 
         const interval = setInterval(() => {
           setTimer((prev) => {
-            if (prev === 1) {
-              clearInterval(interval);
-              setGameState({
-                phase: "reveal",
-                message: `It's ${countries[currentCountryIndex]}!`,
-              });
-              if (audioUrls?.reveals?.[currentCountryIndex]) {
-                setAudioState((prev) => ({
-                  ...prev,
-                  currentAudio: audioUrls.reveals[currentCountryIndex] || null,
-                }));
-              }
-              return 3;
-            }
+           if (prev === 1) {
+             clearInterval(interval);
+             setGameState({
+               phase: "reveal",
+               message: `It's ${countries[currentCountryIndex]}!`,
+             });
+             const currentReveal =
+               audioUrls?.reveals?.[currentCountryIndex] || null;
+             if (currentReveal) {
+               setAudioState((prev) => ({
+                 ...prev,
+                 currentAudio: currentReveal,
+               }));
+             }
+             return 3;
+           }
             return prev - 1;
           });
         }, 1000);
@@ -169,10 +164,8 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
 
     if (gameState.phase === "reveal") {
-      console.log(gameState.phase, "reveal");
       setAnsweredCountries((prev) => [...prev, countries[currentCountryIndex]]);
 
-      // Move to next question or outro after 3 seconds
       setTimeout(() => {
         if (currentCountryIndex < countries.length - 1) {
           setCurrentCountryIndex((prev) => prev + 1);
@@ -196,10 +189,47 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
     }
   }, [gameState.phase, currentCountryIndex, countries, audioUrls, scrambled]);
 
-  // Only render the video preview if the image is ready
   if (!isImageReady) {
-    return null; // Return null or a loading spinner while the image is being generated
+    return null;
   }
+
+  const handleExport = async () => {
+    try {
+      const video = document.querySelector(
+        "video"
+      ) as VideoElementWithCapture | null;
+      if (!video) return;
+
+      // Now TypeScript knows captureStream exists
+      const stream = video.captureStream();
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: "video/webm",
+      });
+
+      const chunks: BlobPart[] = [];
+      mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "quiz-video.webm";
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      };
+
+      mediaRecorder.start();
+      await video.play();
+      setTimeout(() => {
+        mediaRecorder.stop();
+        video.pause();
+      }, (300 / 30) * 1000);
+    } catch (error) {
+      console.error("Failed to export video:", error);
+    }
+  };
 
   return (
     <div
@@ -235,7 +265,6 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
         />
       )}
 
-      {/* Numbers column on the left */}
       <div className="absolute left-8 top-[120px] flex flex-col space-y-4 z-10">
         {Array.from({ length: 10 }, (_, i) => (
           <div key={i} className="flex items-center space-x-4">
@@ -244,23 +273,23 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
             </div>
             {answeredCountries[i] && (
               <motion.div
-  initial={{ opacity: 0, x: -50 }}
-  animate={{ opacity: 1, x: 0 }}
-  transition={{ duration: 0.5, ease: "easeOut" }}
-  className={`px-4 py-1 rounded-md text-white font-medium ${
-    i % 5 === 0
-      ? "bg-red-500"
-      : i % 5 === 1
-      ? "bg-green-500"
-      : i % 5 === 2
-      ? "bg-blue-500"
-      : i % 5 === 3
-      ? "bg-yellow-500"
-      : "bg-purple-500"
-  }`}
->
-  {answeredCountries[i]}
-</motion.div>
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className={`px-4 py-1 rounded-md text-white font-medium ${
+                  i % 5 === 0
+                    ? "bg-red-500"
+                    : i % 5 === 1
+                    ? "bg-green-500"
+                    : i % 5 === 2
+                    ? "bg-blue-500"
+                    : i % 5 === 3
+                    ? "bg-yellow-500"
+                    : "bg-purple-500"
+                }`}
+              >
+                {answeredCountries[i]}
+              </motion.div>
             )}
           </div>
         ))}
@@ -292,46 +321,7 @@ export const QuizRenderer: React.FC<QuizRendererProps> = ({
 
       <div className="absolute bottom-4 right-4 z-20">
         <Button
-          onClick={async () => {
-            try {
-              const video = document.querySelector("video");
-              if (!video) return;
-
-              // Create a MediaRecorder to capture the video
-              const stream = video.captureStream();
-              const mediaRecorder = new MediaRecorder(stream, {
-                mimeType: "video/webm",
-              });
-
-              const chunks: BlobPart[] = [];
-              mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-              mediaRecorder.onstop = () => {
-                const blob = new Blob(chunks, { type: "video/webm" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "quiz-video.webm";
-                document.body.appendChild(a);
-                a.click();
-                URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-              };
-
-              // Start recording
-              mediaRecorder.start();
-
-              // Play the video
-              await video.play();
-
-              // Stop recording after the video duration
-              setTimeout(() => {
-                mediaRecorder.stop();
-                video.pause();
-              }, (300 / 30) * 1000); // Duration in frames / fps * 1000 for milliseconds
-            } catch (error) {
-              console.error("Failed to export video:", error);
-            }
-          }}
+          onClick={handleExport}
           className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md"
         >
           Export Video
