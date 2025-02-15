@@ -73,7 +73,7 @@ export const generateBackgroundImage = async (
         image_size,
         num_images,
       },
-    });
+    })as { images?: { url?: string }[] }; 
 
     if (!result.images?.[0]?.url) {
       throw new Error("No image generated");
